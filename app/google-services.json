@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "319365548905",
+    "project_id": "immigreight",
+    "storage_bucket": "immigreight.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:319365548905:android:838d9831dd4ad338e88bf8",
+        "android_client_info": {
+          "package_name": "com.example.immigr8"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuV5ItCk2Omf51y4nax82rnEhYBqMaB6s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
