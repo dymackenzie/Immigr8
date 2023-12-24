@@ -1,16 +1,21 @@
 package com.example.immigr8;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
 
 import com.example.immigr8.fragments.AlertsFragment;
 import com.example.immigr8.fragments.HomeFragment;
@@ -20,7 +25,6 @@ import com.example.immigr8.model.Blocked;
 import com.example.immigr8.model.CompleteUser;
 import com.example.immigr8.model.Users;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -37,6 +41,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
@@ -44,10 +49,10 @@ public class MainActivity extends AppCompatActivity {
     // Firebase
     FirebaseUser firebaseUser;
     DatabaseReference myRef;
-
     BottomNavigationView bottomNav;
 
-    public static final int REQUEST_CODE = 99;
+    private static final String PERMISSION_READ_EXTERNAL_STORAGE = Manifest.permission.READ_EXTERNAL_STORAGE;
+    private static final int PERMISSION_REQ_CODE = 100;
 
     // Weights
     HashMap<String, Double> default_weights = new HashMap<>();
@@ -64,22 +69,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // initiate the bottom navigation bar
         initBottomNav();
-        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        //registerNow("Mackenzie Dy", "mackenziedy@hotmail.com", "mackenzie");
-        //registerNow("Emily Yu", "emily@hotmail.com", "mackenzie");
-        //registerNow("Adrian Lo", "adrian@hotmail.com", "mackenzie");
-        /*registerNow("Josh Young", "josh@hotmail.com", "mackenzie");
-        registerNow("Mason Wu", "mason@hotmail.com", "mackenzie");
-        registerNow("Shane So", "shane@hotmail.com", "mackenzie");
-        registerNow("Andrew Jackson", "andrew@hotmail.com", "mackenzie");
-        registerNow("Tony Stark", "tony@hotmail.com", "mackenzie");
-        registerNow("Steve Rogers", "steve@hotmail.com", "mackenzie");
-        registerNow("Fred Barkley", "fred@hotmail.com", "mackenzie");
-        registerNow("June Iparis", "june@hotmail.com", "mackenzie");
-        registerNow("Deborah Jones", "deborah@hotmail.com", "mackenzie");*/
+        // initiate demo registering
+        // registerNow("Mackenzie Dy", "mackenziedy@hotmail.com", "mackenzie");
 
+        // check if permissions exist before continuing
         permissions();
     }
 
@@ -109,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Users user = snapshot.getValue(Users.class);
+                assert user != null;
                 currentCompleteUser = buildCompleteUser(user);
             }
 
@@ -155,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     if (dataSnapshot != null) {
-                        if (!(dataSnapshot.getValue(Users.class).getId().equals(firebaseUser.getUid()))) {
+                        if (!(Objects.requireNonNull(dataSnapshot.getValue(Users.class)).getId().equals(firebaseUser.getUid()))) {
                             Users user = dataSnapshot.getValue(Users.class);
                             // builds complete user through method
                             assert user != null;
@@ -180,11 +177,7 @@ public class MainActivity extends AppCompatActivity {
                 recommendedList.addAll(recommendedListMap.keySet());
 
                 for (Blocked blocked : blockedList) {
-                    for (CompleteUser completeUser : recommendedList) {
-                        if (blocked.getSender().equals(firebaseUser.getUid()) && blocked.getReceiver().equals(completeUser.getUser().getId())) {
-                            recommendedList.remove(completeUser);
-                        }
-                    }
+                    recommendedList.removeIf(completeUser -> blocked.getSender().equals(firebaseUser.getUid()) && blocked.getReceiver().equals(completeUser.getUser().getId()));
                 }
 
                 // Home screen
@@ -197,79 +190,8 @@ public class MainActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
+
         });
-    }
-
-    /**
-     * Code for registering, but since we're not allowed to have a login or register page, I'll
-     * just put code here so I can user FirebaseAuth to get my example users.
-     */
-    private void registerNow(String username, String email, String password) {
-        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                        String userId = firebaseUser.getUid();
-
-                        myRef = FirebaseDatabase.getInstance()
-                                .getReference("Users")
-                                .child(userId);
-
-                        HashMap<String,Object> hashMap = new HashMap<>();
-                        hashMap.put("id", userId);
-                        hashMap.put("username", username);
-                        hashMap.put("imageURL", "default");
-                        hashMap.put("status", "offline");
-                        hashMap.put("location", "");
-                        hashMap.put("immigratedFrom", "");
-                        hashMap.put("age", "");
-                        hashMap.put("gender", "");
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            hashMap.put("dateJoined", LocalDate.now().toString());
-                        }
-                        hashMap.put("bio", "");
-                        hashMap.put("timeAsImmigrant", "");
-
-                        myRef.setValue(hashMap);
-
-                        // Another data reference for likes
-                        myRef = FirebaseDatabase.getInstance()
-                                .getReference("Likes")
-                                .child(userId);
-
-                        hashMap = new HashMap<>();
-                        hashMap.put("None", true);
-                        myRef.setValue(hashMap);
-
-                        // Another data reference for values
-                        myRef = FirebaseDatabase.getInstance()
-                                .getReference("Values")
-                                .child(userId);
-
-                        hashMap = new HashMap<>();
-                        hashMap.put("None", true);
-                        myRef.setValue(hashMap);
-
-                        // Another data reference for hobbies
-                        myRef = FirebaseDatabase.getInstance()
-                                .getReference("Hobbies")
-                                .child(userId);
-
-                        hashMap = new HashMap<>();
-                        hashMap.put("None", true);
-                        myRef.setValue(hashMap);
-
-                        // Another data reference for languages
-                        myRef = FirebaseDatabase.getInstance()
-                                .getReference("Languages")
-                                .child(userId);
-
-                        hashMap = new HashMap<>();
-                        hashMap.put("None", true);
-                        myRef.setValue(hashMap);
-
-                    }
-                });
     }
 
     /**
@@ -314,19 +236,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Fragment selectedFragment = null;
-                switch (item.getItemId()) {
-                    case 1000075:
-                        selectedFragment = new HomeFragment();
-                        break;
-                    case 1000096:
-                        selectedFragment = new MessagingFragment();
-                        break;
-                    case 1000016:
-                        selectedFragment = new AlertsFragment();
-                        break;
-                    case 1000023:
-                        selectedFragment = new ProfileFragment();
-                        break;
+
+                if (item.getItemId() == R.id.nav_home) {
+                    selectedFragment = new HomeFragment();
+                } else if (item.getItemId() == R.id.nav_message) {
+                    selectedFragment = new MessagingFragment();
+                } else if (item.getItemId() == R.id.nav_alert) {
+                    selectedFragment = new AlertsFragment();
+                } else if (item.getItemId() == R.id.nav_profile) {
+                    selectedFragment = new ProfileFragment();
                 }
 
                 if (selectedFragment != null) {
@@ -345,8 +263,7 @@ public class MainActivity extends AppCompatActivity {
      * @param order true is ASCENDING, false is DESCENDING
      * @return sorted map
      */
-    private static Map<CompleteUser, Double> sortByValue(Map<CompleteUser, Double> unsortedMap, final boolean order)
-    {
+    private static Map<CompleteUser, Double> sortByValue(Map<CompleteUser, Double> unsortedMap, final boolean order) {
         List<Map.Entry<CompleteUser, Double>> list = new LinkedList<>(unsortedMap.entrySet());
 
         // Sorting the list based on values
@@ -366,6 +283,7 @@ public class MainActivity extends AppCompatActivity {
      * @return double as the score (higher is better)
      */
     private double scoring_function(HashMap<String, Double> weights, CompleteUser user1, CompleteUser user2) {
+
         double score = 0.0;
         // compare hobbies
         // +add for each hobby * weight
@@ -445,6 +363,7 @@ public class MainActivity extends AppCompatActivity {
                 score += weights.get("immigratedFrom");
         }
 
+        Log.e("myLog", "" + score);
         return score;
     }
 
@@ -526,28 +445,139 @@ public class MainActivity extends AppCompatActivity {
     /*************************
      * Both of these methods (permissions and onRequestPermissionResult) makes sure the app has permission from the user to access and read
      * the external storage.
-     *
+     * <p>
      * These also run the getAllAudio method and initializes the RecyclerView.
      */
 
     private void permissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE);
-        else {
-            // Set up recommended list
+
+        if (ActivityCompat.checkSelfPermission(this, PERMISSION_READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+
             initRecommended();
+
+        } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, PERMISSION_READ_EXTERNAL_STORAGE)) {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("This app requires READ_EXTERNAL_STORAGE permission for it to run.")
+                    .setTitle("Permission Required")
+                    .setCancelable(false)
+                    .setPositiveButton("Okay", (dialogInterface, i) -> {
+                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{PERMISSION_READ_EXTERNAL_STORAGE}, PERMISSION_REQ_CODE);
+                        dialogInterface.dismiss();
+                    })
+                    .setNegativeButton("Cancel", ((dialogInterface, which) -> dialogInterface.dismiss()));
+
+            builder.show();
+
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{PERMISSION_READ_EXTERNAL_STORAGE}, PERMISSION_REQ_CODE);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CODE) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == PERMISSION_REQ_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
                 // Set up recommended list
+                Toast.makeText(this, "Permission Granted", Toast.LENGTH_LONG).show();
                 initRecommended();
-            } else
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE);
+
+            } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, PERMISSION_READ_EXTERNAL_STORAGE)) {
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("This app requires READ_EXTERNAL_STORAGE permission for it to run.")
+                        .setTitle("Permission Required")
+                        .setCancelable(false)
+                        .setPositiveButton("Settings", (dialogInterface, i) -> {
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package", getPackageName(), null);
+                            intent.setData(uri);
+                            startActivity(intent);
+                            dialogInterface.dismiss();
+                        })
+                        .setNegativeButton("Cancel", ((dialogInterface, which) -> dialogInterface.dismiss()));
+
+                builder.show();
+
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQ_CODE);
+            }
         }
     }
+
+    /**
+     * Code for registering, but since we're not allowed to have a login or register page, I'll
+     * just put code here so I can user FirebaseAuth to get my example users.
+     */
+    private void registerNow(String username, String email, String password) {
+        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                        assert firebaseUser != null;
+                        String userId = firebaseUser.getUid();
+
+                        myRef = FirebaseDatabase.getInstance()
+                                .getReference("Users")
+                                .child(userId);
+
+                        HashMap<String,Object> hashMap = new HashMap<>();
+                        hashMap.put("id", userId);
+                        hashMap.put("username", username);
+                        hashMap.put("imageURL", "default");
+                        hashMap.put("status", "offline");
+                        hashMap.put("location", "");
+                        hashMap.put("immigratedFrom", "");
+                        hashMap.put("age", "");
+                        hashMap.put("gender", "");
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            hashMap.put("dateJoined", LocalDate.now().toString());
+                        }
+                        hashMap.put("bio", "");
+                        hashMap.put("timeAsImmigrant", "");
+
+                        myRef.setValue(hashMap);
+
+                        // Another data reference for likes
+                        myRef = FirebaseDatabase.getInstance()
+                                .getReference("Likes")
+                                .child(userId);
+
+                        hashMap = new HashMap<>();
+                        hashMap.put("None", true);
+                        myRef.setValue(hashMap);
+
+                        // Another data reference for values
+                        myRef = FirebaseDatabase.getInstance()
+                                .getReference("Values")
+                                .child(userId);
+
+                        hashMap = new HashMap<>();
+                        hashMap.put("None", true);
+                        myRef.setValue(hashMap);
+
+                        // Another data reference for hobbies
+                        myRef = FirebaseDatabase.getInstance()
+                                .getReference("Hobbies")
+                                .child(userId);
+
+                        hashMap = new HashMap<>();
+                        hashMap.put("None", true);
+                        myRef.setValue(hashMap);
+
+                        // Another data reference for languages
+                        myRef = FirebaseDatabase.getInstance()
+                                .getReference("Languages")
+                                .child(userId);
+
+                        hashMap = new HashMap<>();
+                        hashMap.put("None", true);
+                        myRef.setValue(hashMap);
+
+                    }
+                });
+    }
+
 }
