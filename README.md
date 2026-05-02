@@ -2,21 +2,45 @@
 
 ![home_screen_immigr8](https://github.com/dymackenzie/Immigr8/assets/73260054/3d9ecd01-9dcf-417a-b9c6-94daf77e0280)
 
+A friendly Android app that helps new immigrants connect by matching people based on upbringing, values, and personality — not appearance.
 
-An Android app to enable networking for new immigrants. It judges compatibility not by looks, as most apps do, but by similarities in upbringing and personality. It uses an algorithm with weights to judge which person would be more compatible with another.
-Some of its features are:
+**Table of contents**
+- [What is Immigr8](#what-is-immigr8)
+- [Key features](#key-features)
+- [Screenshots](#screenshots)
+- [Tech stack](#tech-stack)
+- [Local setup](#local-setup)
+- [Firebase notes](#firebase-notes)
+- [Contributing](#contributing)
+- [License](#license)
 
-- Implementation with Firebase for profile picture storage, account information, and account authentication.
-- It hosts its own direct messaging system with history and real-time updates.
-- It recommends more compatible users through algorithms.
-- It showcases a clean and custom UI that is readable and easy to navigate.
-- Implements its own friend system where friend requests can be sent and declined.
-- Users can be blocked for further protection.
-- It features a profile editing page where users can edit their own information and store it on the cloud.
+## What is Immigr8
 
-For a complete video, check https://www.youtube.com/live/Th6ut9fE2o0?si=lLeBtYWB8VOs758A at timestamp 2:10:12.
+Immigr8 recommends people likely to be compatible by computing weighted similarity across cultural background, upbringing, and personality traits. It includes secure authentication, profile management, a friend system, and real-time messaging.
 
-# Images
+## Key features
+
+- **Compatibility matching:** Custom algorithm with weighted scoring to surface meaningful matches.
+- **Authentication & profiles:** Firebase-backed accounts and profile picture storage.
+- **Real-time chat:** Direct messaging with history and live updates.
+- **Friend system:** Send, accept, decline requests and block users.
+- **Profile editing:** Store and update profile details in the cloud.
+
+## Demo / Video
+
+For a complete walkthrough and demo, watch the developer video on YouTube (starts at the relevant section):
+
+https://www.youtube.com/live/Th6ut9fE2o0?si=lLeBtYWB8VOs758A&t=7812
+
+Timestamp: 2:10:12 into the video.
+
+## Screenshots
 
 ![messages_immigr8](https://github.com/dymackenzie/Immigr8/assets/73260054/4c638765-0416-437c-b9c9-fb842553fd26)
 ![profile_picture_immigr8](https://github.com/dymackenzie/Immigr8/assets/73260054/98dbd9c6-f1f5-462f-a7c9-697364b134d3)
+
+## Tech stack
+
+- Android (Kotlin)
+- Firebase (Authentication, Realtime Database / Firestore, Storage)
+- Gradle build system
