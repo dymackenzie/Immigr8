@@ -1,6 +1,6 @@
 # Immigr8
 
-![home_screen_immigr8](https://github.com/dymackenzie/Immigr8/assets/73260054/3d9ecd01-9dcf-417a-b9c6-94daf77e0280)
+<img width="480" height="270" alt="immigr8 product gif" src="https://github.com/user-attachments/assets/2d22b7f3-b364-4586-8e63-fedf4bab10a2" />
 
 A friendly Android app that helps new immigrants connect by matching people based on upbringing, values, and personality — not appearance.
 
@@ -9,10 +9,6 @@ A friendly Android app that helps new immigrants connect by matching people base
 - [Key features](#key-features)
 - [Screenshots](#screenshots)
 - [Tech stack](#tech-stack)
-- [Local setup](#local-setup)
-- [Firebase notes](#firebase-notes)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## What is Immigr8
 
@@ -36,8 +32,8 @@ Timestamp: 2:10:12 into the video.
 
 ## Screenshots
 
+![home_screen_immigr8](https://github.com/dymackenzie/Immigr8/assets/73260054/3d9ecd01-9dcf-417a-b9c6-94daf77e0280)
 ![messages_immigr8](https://github.com/dymackenzie/Immigr8/assets/73260054/4c638765-0416-437c-b9c9-fb842553fd26)
-![profile_picture_immigr8](https://github.com/dymackenzie/Immigr8/assets/73260054/98dbd9c6-f1f5-462f-a7c9-697364b134d3)
 
 ## Tech stack
 
